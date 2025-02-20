@@ -1,0 +1,63 @@
+---
+title: "My portfolio"
+author: 'Elze'
+output: 
+  flexdashboard::flex_dashboard:
+     storyboard: true
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(flexdashboard)
+library(plotly)
+library(wesanderson)
+```
+
+### What contributes to the valence of the song?
+
+![Photo by Kate Kunz/Corbis](https://i.dailymail.co.uk/i/pix/2013/05/15/article-2325004-19CBB2DF000005DC-701_1024x615_large.jpg)
+
+------------------------------------------------------------------------
+
+One might suppose that songs that are faster, more upbeat are 'happier' than slow ones because of how 'happiness' is defined stereotipically. However, that's not the case, at least in AI music world. In the next tab you can see a scatter plot which denies this presupposition.
+
+### Arousal is key to valence
+
+```{r}
+aisc2024<- read_csv("aisc2024.csv")
+aisc2024 |>                   # Start with the data
+  ggplot(                     # Set up the plot.
+    aes(
+      x = tempo,
+      y = arousal,
+      colour = valence
+    )
+  ) +
+  geom_point() +              # Scatter plot.
+  
+  
+  scale_x_continuous(         # Fine-tune the x axis.
+    
+    minor_breaks = NULL       # Remove 'minor' grid lines.
+  ) +
+  scale_y_continuous(         # Fine-tune the y axis in the same way.
+    
+    minor_breaks = NULL
+  ) +
+  scale_colour_viridis_c() +  # Use the popular viridis colour palette.
+  scale_size_continuous(      # Fine-tune the sizes of each point.
+    trans = "exp",            # Use an exp transformation to emphasise loud..
+    guide = "none"            # Remove the legend for size.
+  ) +
+  theme_light() +             # Use a simpler theme.
+  labs(                       # Make the titles nice.
+    x = "Tempo",
+    y = "Arousal",
+    colour = "Valence"
+  )
+ggplotly()
+```
+
+------------------------------------------------------------------------
+
+On left you can see a scatter plot, which indicates the relationship between arousal, tempo and valence features in 2024 AI Song Contest's applications. At the bottom right corner one can see that songs, that are fast but don't evoke much arousal, score lower in valence than the songs with slow tempo but higher arousal. The minimum amount of arousal for obvious effect on valence seems to be 4.25. Arousal is probably not the only contributor to the valence of the song. Further research is needed to summarize what creates valence. Maybe it's the liveliness or the loudness of the track that makes it seem 'happier'?
