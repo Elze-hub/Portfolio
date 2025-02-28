@@ -17,6 +17,54 @@ source("compmus.R")
   
 ```
 
+
+### Chroma-based Self-similarity matrix
+
+```{r}
+"features/elze-s-2.json" |>                           # Change the track
+  compmus_chroma(norm = "identity") |>                 # Change the norm
+  compmus_self_similarity(
+    feature = pc,
+    distance = "euclidean"                             # Change the distance
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic()+
+  ggtitle("Chroma-based self-similarity matrix of 'Random Fish's Name'\n by Common Sexuality")+theme(plot.title = element_text(hjust = 0.5))# Change the theme?
+
+```
+
+
+------------------------------------------------------------------------
+
+On the left you can see the chroma-based self-similarity matrix of my band's song "Random Fish's Name".As is indicated in this matrix, the song is homogeneous in terms of harmony, as it is based on a few chords which are playing repetitively. The 'small' blue squares in the beginning, middle and end of the song indicate the usage of ambient sounds and sound effects.
+
+
+### Timbre based self-similarity matrix
+
+```{r}
+"features/elze-s-2.json" |>                           # Change the track
+  compmus_mfccs(norm = "identity") |>                  # Change the norm
+  compmus_self_similarity(
+    feature = mfcc,
+    distance = "euclidean"                             # Change the distance
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic()+
+  ggtitle("Timbre-based self-similarity matrix of 'Random Fish's Name'\n by Common Sexuality")+theme(plot.title = element_text(hjust = 0.5))     
+
+```
+
+------------------------------------------------------------------------
+
+On the left you can see the timbre based self-similarity matrix of my band's song "Random Fish's Name". The song begins with sounds of crackling fireplace and water drops, which is constituted by the 'small navy square' in the left bottom corner. As the guitar joins in in the 20th second of the song, followed by vocals and ambient noises, the timbre becomes more varied. This variation is increased even more when bass and drums comes in, expanding the sphere of timbre even more with added low frequencies. The two 'big navy squares' in the top right show the timbre similarity of two verses and two choruses. The instruments (2 guitars, drums, bass and vocals) in all of them are not only the same but also perform almost identical parts, which is what makes those squares appear. The small gap between those squares indicates a guitar solo, which disrupts the timbre similarity.
+
+
 ### Chromagram
 
 ```{r}
@@ -35,7 +83,8 @@ source("compmus.R")
   ) +
   scale_fill_viridis_c(guide = "none") +               # Change the colours?
   labs(x = "Time (s)", y = NULL, fill = NULL) +
-  theme_classic()            
+  theme_classic()+
+  ggtitle("Chromagram of 'Random Fish's Name' by Common Sexuality")+theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -52,43 +101,8 @@ source("compmus.R")
   ) +
   scale_fill_viridis_c(guide = "none") +               # Change the colours?
   labs(x = "Time (s)", y = "Coefficient Number", fill = NULL) +
-  theme_classic()
-
-```
-
-### Chroma-based Self-similarity matrix
-
-```{r}
-"features/elze-s-2.json" |>                           # Change the track
-  compmus_chroma(norm = "euclidean") |>                 # Change the norm
-  compmus_self_similarity(
-    feature = pc,
-    distance = "euclidean"                             # Change the distance
-  ) |>   
-  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +               # Change the colours?
-  labs(x = "Time (s)", y = NULL, fill = NULL) +
-  theme_classic()                                      # Change the theme?
-
-```
-
-
-
-### Timbre based self-similarity matrix
-
-```{r}
-"features/elze-s-2.json" |>                           # Change the track
-  compmus_mfccs(norm = "identity") |>                  # Change the norm
-  compmus_self_similarity(
-    feature = mfcc,
-    distance = "euclidean"                             # Change the distance
-  ) |>   
-  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +               # Change the colours?
-  labs(x = "Time (s)", y = NULL, fill = NULL) +
-  theme_classic()      
+  theme_classic()+
+  ggtitle("Cepstogram of 'Random Fish's Name' by Common Sexuality")+theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -133,7 +147,8 @@ aisc2024 |>                   # Start with the data
     x = "Tempo",
     y = "Arousal",
     colour = "Valence"
-  )
+  )+
+  ggtitle("Relationship between tempo, arousal and valence/n in 2024 AI Song Contest")+theme(plot.title = element_text(hjust = 0.5))
 ggplotly()
 ```
 
