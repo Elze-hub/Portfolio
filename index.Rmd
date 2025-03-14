@@ -11,11 +11,175 @@ library(tidyverse)
 library(flexdashboard)
 library(plotly)
 library(rjson)
+library(signal)
 library(wesanderson)
 source("compmus.R")
 
   
 ```
+
+### Tempo analysis
+
+
+#### Fourier-based tempogram of "Random Fish's Name" by Common Sexuality
+
+```{r}
+
+"features/elze-s-2.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+
+```
+
+----------------------------------------------------------------------------------
+
+Both Fourier-based (above) and cyclical (below) tempograms indicate a relatively stable tempo,excluding the beginning and the ending of the song. However, cyclical tempogram seems to have assigned a more accurate tempo as it is around 90BPM. The fluctuation of tempo in the beginning and the end is caused by the usage of ambient sounds. 
+
+
+#### Cyclical tempogram of "Random Fish's Name" by Common Sexuality
+
+```{r}
+
+"features/elze-s-2.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+  
+```
+
+### Keygram and chordogram
+
+#### Keygram of "Random Fish's Name" by Common Sexuality
+
+```{r}
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+
+"features/elze-s-2.json" |> 
+  compmus_chroma(norm = "manhattan") |> 
+  compmus_match_pitch_templates(
+    key_templates,         # Change to chord_templates if desired
+    norm = "manhattan",       # Try different norms (and match it with what you used in `compmus_chroma`)
+    distance = "manhattan"   # Try different distance metrics
+  ) |>
+  ggplot(aes(x = time, y = name, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = "Template", fill = NULL) +
+  theme_classic()           
+```
+
+---------------------------------------------------------------
+
+The keygram on the
+
+#### Chordogram of "Random Fish's Name" by Common Sexuality
+
+```{r}
+"features/elze-s-2.json" |> 
+  compmus_chroma(norm = "identity") |> 
+  compmus_match_pitch_templates(
+    chord_templates,         # Change to chord_templates if desired
+    norm = "identity",       # Try different norms (and match it with what you used in `compmus_chroma`)
+    distance = "cosine"   # Try different distance metrics
+  ) |>
+  ggplot(aes(x = time, y = name, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = "Template", fill = NULL) +
+  theme_classic()           
+
+```
+
+--------------------------------------------------------------------
+
+The chordogram on the left indicates 
 
 
 ### Chroma-based Self-similarity matrix
@@ -36,11 +200,9 @@ source("compmus.R")
 
 ```
 
-
 ------------------------------------------------------------------------
 
 On the left you can see the chroma-based self-similarity matrix of my band's song "Random Fish's Name".As is indicated in this matrix, the song is homogeneous in terms of harmony, as it is based on a few chords which are playing repetitively. The 'small' blue squares in the beginning, middle and end of the song indicate the usage of ambient sounds and sound effects.
-
 
 ### Timbre based self-similarity matrix
 
@@ -63,7 +225,6 @@ On the left you can see the chroma-based self-similarity matrix of my band's son
 ------------------------------------------------------------------------
 
 On the left you can see the timbre based self-similarity matrix of my band's song "Random Fish's Name". The song begins with sounds of crackling fireplace and water drops, which is constituted by the 'small navy square' in the left bottom corner. As the guitar joins in in the 20th second of the song, followed by vocals and ambient noises, the timbre becomes more varied. This variation is increased even more when bass and drums comes in, expanding the sphere of timbre even more with added low frequencies. The two 'big navy squares' in the top right show the timbre similarity of two verses and two choruses. The instruments (2 guitars, drums, bass and vocals) in all of them are not only the same but also perform almost identical parts, which is what makes those squares appear. The small gap between those squares indicates a guitar solo, which disrupts the timbre similarity.
-
 
 ### Chromagram
 
