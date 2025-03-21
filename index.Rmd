@@ -56,6 +56,7 @@ ggplotly(dendrogram_plot)
 ```
 
 ------------------------------------------------------
+
 My track 'elze-s-1'was clustered with tracks 'senn-v-2','lennart-p-2' and 'tobias-p-2'.All of these tracks are in a similar tempo. Since my track has hi-hat in sixteenth notes, as opposed to others having more 8th note feel (except maybe Tobia's song, in which kick drum is playing sixteenth note patterns), it seems faster when the tempo is actually the same. The key of the songs seems to be the same or close as well. 
 
 My other track 'elze-s-2' has been clustered with 'mees-k-2'. It surprised me because these songs have completely different feels: mine seems to be calming, while Mees's intensifying. However, after more in depth analysis I noticed a some-what similarity in their instrumentalists and tempo.
@@ -70,7 +71,6 @@ My other track 'elze-s-2' has been clustered with 'mees-k-2'. It surprised me be
  #)
 ```
 
----------------------------------------------------------
 
 ### Tempo analysis
 
