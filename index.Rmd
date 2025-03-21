@@ -21,9 +21,8 @@ source("compmus.R")
   
 ```
 
-### Clustering and classification
+### Clustering
 
-#### Hierarchical clustering
 ```{r}
 compmus2025 <- read_csv("compmus2025.csv")
 
