@@ -13,10 +13,65 @@ library(plotly)
 library(rjson)
 library(signal)
 library(wesanderson)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
 source("compmus.R")
 
   
 ```
+
+### Clustering and classification
+
+#### Hierarchical clustering
+```{r}
+compmus2025 <- read_csv("compmus2025.csv")
+
+cluster_juice <-
+  recipe(
+    filename ~
+      arousal +
+      instrumentalness +
+      tempo +
+      valence,
+    data = compmus2025
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(compmus2025) |>
+  juice() |>
+  column_to_rownames("filename")
+
+compmus_dist <- dist(cluster_juice, method = "euclidean")
+
+# Hierarchical clustering and dendrogram
+dendrogram_plot <- compmus_dist |> 
+  hclust(method = "complete") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+
+# Make the plot interactive
+ggplotly(dendrogram_plot)
+
+```
+
+------------------------------------------------------
+My track 'elze-s-1'was clustered with tracks 'senn-v-2','lennart-p-2' and 'tobias-p-2'.All of these tracks are in a similar tempo. Since my track has hi-hat in sixteenth notes, as opposed to others having more 8th note feel (except maybe Tobia's song, in which kick drum is playing sixteenth note patterns), it seems faster when the tempo is actually the same. The key of the songs seems to be the same or close as well. 
+
+My other track 'elze-s-2' has been clustered with 'mees-k-2'. It surprised me because these songs have completely different feels: mine seems to be calming, while Mees's intensifying. However, after more in depth analysis I noticed a some-what similarity in their instrumentalists and tempo.
+
+
+```{r}
+#heatmaply(
+ #cluster_juice,
+  #hclustfun = hclust,
+# hclust_method = "complete",  # Change for single, average, or complete linkage.
+ # dist_method = "euclidean"
+ #)
+```
+
+---------------------------------------------------------
 
 ### Tempo analysis
 
@@ -79,7 +134,7 @@ chord_templates <-
     "Gb:maj", circshift(major_chord, 6),
     "Bb:min", circshift(minor_chord, 10),
     "Db:maj", circshift(major_chord, 1),
-    "F:min", circshift(minor_chord, 5),
+     "F:min", circshift(minor_chord, 5),
     "Ab:7", circshift(seventh_chord, 8),
     "Ab:maj", circshift(major_chord, 8),
     "C:min", circshift(minor_chord, 0),
@@ -162,18 +217,18 @@ The keygram on the
 #### Chordogram of "Random Fish's Name" by Common Sexuality
 
 ```{r}
-"features/elze-s-2.json" |> 
-  compmus_chroma(norm = "identity") |> 
-  compmus_match_pitch_templates(
-    chord_templates,         # Change to chord_templates if desired
-    norm = "identity",       # Try different norms (and match it with what you used in `compmus_chroma`)
-    distance = "cosine"   # Try different distance metrics
-  ) |>
-  ggplot(aes(x = time, y = name, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +               # Change the colours?
-  labs(x = "Time (s)", y = "Template", fill = NULL) +
-  theme_classic()           
+#"features/elze-s-2.json" |> 
+ # compmus_chroma(norm = "identity") |> 
+  #compmus_match_pitch_templates(
+   # chord_templates,         # Change to chord_templates if desired
+    #norm = "identity",       # Try different norms (and match it with what you used in `compmus_chroma`)
+#    distance = "cosine"   # Try different distance metrics
+ # ) |>
+  #ggplot(aes(x = time, y = name, fill = d)) + 
+  #geom_raster() +
+  #scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  #labs(x = "Time (s)", y = "Template", fill = NULL) +
+  #theme_classic()           
 
 ```
 
@@ -185,18 +240,18 @@ The chordogram on the left indicates
 ### Chroma-based Self-similarity matrix
 
 ```{r}
-"features/elze-s-2.json" |>                           # Change the track
-  compmus_chroma(norm = "identity") |>                 # Change the norm
-  compmus_self_similarity(
-    feature = pc,
-    distance = "euclidean"                             # Change the distance
-  ) |>   
-  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +               # Change the colours?
-  labs(x = "Time (s)", y = NULL, fill = NULL) +
-  theme_classic()+
-  ggtitle("Chroma-based self-similarity matrix of 'Random Fish's Name'\n by Common Sexuality")+theme(plot.title = element_text(hjust = 0.5))# Change the theme?
+#"features/elze-s-2.json" |>                           # Change the track
+ # compmus_chroma(norm = "identity") |>                 # Change the norm
+  #compmus_self_similarity(
+   # feature = pc,
+    #distance = "euclidean"                             # Change the distance
+#  ) |>   
+ # ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  #geom_raster() +
+  #scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  #labs(x = "Time (s)", y = NULL, fill = NULL) +
+  #theme_classic()+
+  #ggtitle("Chroma-based self-similarity matrix of 'Random Fish's Name'\n by Common #Sexuality")+theme(plot.title = element_text(hjust = 0.5))# Change the theme?
 
 ```
 
@@ -207,18 +262,18 @@ On the left you can see the chroma-based self-similarity matrix of my band's son
 ### Timbre based self-similarity matrix
 
 ```{r}
-"features/elze-s-2.json" |>                           # Change the track
-  compmus_mfccs(norm = "identity") |>                  # Change the norm
-  compmus_self_similarity(
-    feature = mfcc,
-    distance = "euclidean"                             # Change the distance
-  ) |>   
-  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +               # Change the colours?
-  labs(x = "Time (s)", y = NULL, fill = NULL) +
-  theme_classic()+
-  ggtitle("Timbre-based self-similarity matrix of 'Random Fish's Name'\n by Common Sexuality")+theme(plot.title = element_text(hjust = 0.5))     
+#"features/elze-s-2.json" |>                           # Change the track
+ # compmus_mfccs(norm = "identity") |>                  # Change the norm
+  #compmus_self_similarity(
+   # feature = mfcc,
+    #distance = "euclidean"                             # Change the distance
+  #) |>   
+  #ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  #geom_raster() +
+  #scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  #labs(x = "Time (s)", y = NULL, fill = NULL) +
+  #theme_classic()+
+  #ggtitle("Timbre-based self-similarity matrix of 'Random Fish's Name'\n by Common #Sexuality")+theme(plot.title = element_text(hjust = 0.5))     
 
 ```
 
@@ -229,23 +284,22 @@ On the left you can see the timbre based self-similarity matrix of my band's son
 ### Chromagram
 
 ```{r}
-"features/elze-s-2.json" |>                           # Change the track
-  compmus_chroma(norm = "identity") |>                 # Change the norm
-  ggplot(aes(x = time, y = pc, fill = value)) + 
-  geom_raster() +
-  scale_y_continuous(
-    breaks = 0:11,
-    minor_breaks = NULL,
-    labels = c(
-                "C", "C#|Db", "D", "D#|Eb",
-                "E", "F", "F#|Gb", "G",
-                "G#|Ab", "A", "A#|Bb", "B"
-              )
-  ) +
-  scale_fill_viridis_c(guide = "none") +               # Change the colours?
-  labs(x = "Time (s)", y = NULL, fill = NULL) +
-  theme_classic()+
-  ggtitle("Chromagram of 'Random Fish's Name' by Common Sexuality")+theme(plot.title = element_text(hjust = 0.5))
+# compmus_chroma(norm = "identity") |>                 # Change the norm
+ # ggplot(aes(x = time, y = pc, fill = value)) + 
+  #geom_raster() +
+#  scale_y_continuous(
+ #   breaks = 0:11,
+  #  minor_breaks = NULL,
+   # labels = c(
+  #              "C", "C#|Db", "D", "D#|Eb",
+   #             "E", "F", "F#|Gb", "G",
+    #            "G#|Ab", "A", "A#|Bb", "B"
+#              )
+ # ) +
+  #scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  #labs(x = "Time (s)", y = NULL, fill = NULL) +
+  #theme_classic()+
+  #ggtitle("Chromagram of 'Random Fish's Name' by Common Sexuality")+theme(plot.title = element_text(hjust #= 0.5))
 
 ```
 
@@ -276,6 +330,8 @@ On the left you can see the timbre based self-similarity matrix of my band's son
 One might suppose that songs that are faster, more upbeat are 'happier' than slow ones because of how 'happiness' is defined stereotipically. However, that's not the case, at least in AI music world. In the next tab you can see a scatter plot which denies this presupposition.
 
 ### Arousal is key to valence
+
+#### 1
 
 ```{r}
 aisc2024<- read_csv("aisc2024.csv")
